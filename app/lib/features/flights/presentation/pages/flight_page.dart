@@ -7,6 +7,7 @@ import 'package:flightdeck/features/flights/presentation/bloc/flight_state.dart'
 import 'package:flightdeck/features/flights/presentation/widgets/filter_bottom_sheet.dart';
 import 'package:flightdeck/features/flights/presentation/widgets/flight_card.dart';
 import 'package:flightdeck/features/flights/presentation/widgets/flight_header.dart';
+import 'package:flightdeck/features/flights/presentation/widgets/sort_bottom_sheet.dart';
 import 'package:flightdeck/features/flights/presentation/widgets/sort_filter_bar.dart';
 
 /// Main flight listing screen reproducing the FlyWT Figma design.
@@ -271,12 +272,9 @@ class FlightPage extends StatelessWidget {
   }
 
   void _openSortBottomSheet(BuildContext context, FlightLoaded state) {
-    // Placeholder triggered before bottom sheet widget is created in next step
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Opening Sort...'),
-        duration: Duration(milliseconds: 500),
-      ),
+    SortBottomSheet.show(
+      context,
+      initialSortType: state.sortType,
     );
   }
 
