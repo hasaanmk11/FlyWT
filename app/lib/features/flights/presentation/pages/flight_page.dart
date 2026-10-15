@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flightdeck/features/flights/presentation/bloc/flight_bloc.dart';
 import 'package:flightdeck/features/flights/presentation/bloc/flight_event.dart';
 import 'package:flightdeck/features/flights/presentation/bloc/flight_state.dart';
+import 'package:flightdeck/features/flights/presentation/widgets/flight_card.dart';
 
 /// Main screen displaying the flight catalog with filtering, sorting, and caching.
 class FlightPage extends StatelessWidget {
@@ -236,19 +237,7 @@ class FlightPage extends StatelessWidget {
       itemCount: state.displayedFlights.length,
       itemBuilder: (context, index) {
         final flight = state.displayedFlights[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            title: Text(flight.airlineName),
-            subtitle: Text(
-              '${flight.departureAirport} -> ${flight.arrivalAirport}',
-            ),
-            trailing: Text(
-              '${flight.price} ${flight.currency}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        );
+        return FlightCard(flight: flight);
       },
     );
   }
