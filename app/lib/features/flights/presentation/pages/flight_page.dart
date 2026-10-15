@@ -14,9 +14,9 @@ class FlightPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A), // Deep Slate Navy
+        backgroundColor: const Color(0xFF0F172A),
         elevation: 0,
         centerTitle: false,
         title: Row(
@@ -47,16 +47,27 @@ class FlightPage extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Flight Search & Results',
+                  'DXB ➔ KWI • Flight Results',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Reload Flights',
+            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+            onPressed: () {
+              context.read<FlightBloc>().add(const LoadFlights());
+            },
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
       body: BlocBuilder<FlightBloc, FlightState>(
         builder: (context, state) {
@@ -132,8 +143,8 @@ class FlightPage extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFEE2E2),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFEE2E2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -197,10 +208,13 @@ class FlightPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.white,
+            border: const Border(
+              bottom: BorderSide(color: Color(0xFFE2E8F0), width: 1),
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -222,12 +236,12 @@ class FlightPage extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${state.displayedFlights.length} of ${state.allFlights.length} flights',
+                    '${state.displayedFlights.length} of ${state.allFlights.length} flights available',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -241,23 +255,33 @@ class FlightPage extends StatelessWidget {
                             .read<FlightBloc>()
                             .add(const ClearFlightFilter());
                       },
-                      child: const Row(
-                        children: [
-                          Icon(
-                            Icons.close_rounded,
-                            size: 14,
-                            color: Color(0xFFDC2626),
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'Reset Filter',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEE2E2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.close_rounded,
+                              size: 13,
                               color: Color(0xFFDC2626),
                             ),
-                          ),
-                        ],
+                            SizedBox(width: 4),
+                            Text(
+                              'Clear Filter',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFFDC2626),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                 ],
@@ -268,60 +292,83 @@ class FlightPage extends StatelessWidget {
 
         // Flights List or Empty State
         Expanded(
-          child: state.displayedFlights.isEmpty
-              ? _buildEmptyState(context)
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: state.displayedFlights.length,
-                  itemBuilder: (context, index) {
-                    final flight = state.displayedFlights[index];
-                    return FlightCard(flight: flight);
-                  },
-                ),
+          child: RefreshIndicator(
+            color: const Color(0xFF2563EB),
+            onRefresh: () async {
+              context.read<FlightBloc>().add(const LoadFlights());
+            },
+            child: state.displayedFlights.isEmpty
+                ? _buildEmptyState(context)
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: state.displayedFlights.length,
+                    itemBuilder: (context, index) {
+                      final flight = state.displayedFlights[index];
+                      return FlightCard(flight: flight);
+                    },
+                  ),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 64,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'No flights found',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 64),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.search_off_rounded,
+                  size: 48,
+                  color: Colors.grey.shade500,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Try selecting a different airline or clearing the filter.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF64748B),
+              const SizedBox(height: 16),
+              const Text(
+                'No flights found',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E293B),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            TextButton.icon(
-              onPressed: () {
-                context.read<FlightBloc>().add(const ClearFlightFilter());
-              },
-              icon: const Icon(Icons.clear_all_rounded),
-              label: const Text('Show All Airlines'),
-            ),
-          ],
+              const SizedBox(height: 8),
+              const Text(
+                'Try selecting a different airline or resetting the active filter.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () {
+                  context.read<FlightBloc>().add(const ClearFlightFilter());
+                },
+                icon: const Icon(Icons.clear_all_rounded, size: 18),
+                label: const Text('Show All Airlines'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0F172A),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
