@@ -1,10 +1,10 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// Helper class to manage SQLite database creation and lifecycle.
+/// Helper class to manage SQLite database creation, schema, and lifecycle.
 class DatabaseHelper {
   static const String _databaseName = 'flightdeck.db';
-  static const int _databaseVersion = 1;
+  static const int _databaseVersion = 2;
 
   /// Flights table name
   static const String tableFlights = 'flights';
@@ -28,6 +28,7 @@ class DatabaseHelper {
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -44,10 +45,25 @@ class DatabaseHelper {
         arrival_time TEXT,
         duration TEXT,
         stops INTEGER,
+        return_airline_name TEXT,
+        return_airline_code TEXT,
+        return_flight_number TEXT,
+        return_departure_airport TEXT,
+        return_arrival_airport TEXT,
+        return_departure_time TEXT,
+        return_arrival_time TEXT,
+        return_duration TEXT,
+        return_stops INTEGER,
         price REAL,
-        currency TEXT
+        currency TEXT,
+        is_refundable INTEGER DEFAULT 0
       )
     ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    await db.execute('DROP TABLE IF EXISTS $tableFlights');
+    await _onCreate(db, newVersion);
   }
 
   /// Closes database connection if open.
