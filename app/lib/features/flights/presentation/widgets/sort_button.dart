@@ -105,13 +105,21 @@ class SortButton extends StatelessWidget {
   IconData _iconForSortType(FlightSortType type) {
     switch (type) {
       case FlightSortType.priceLowToHigh:
+      case FlightSortType.priceAscending:
         return Icons.arrow_upward_rounded;
       case FlightSortType.priceHighToLow:
+      case FlightSortType.priceDescending:
         return Icons.arrow_downward_rounded;
       case FlightSortType.departureTime:
         return Icons.access_time_rounded;
       case FlightSortType.duration:
+      case FlightSortType.durationAscending:
         return Icons.timer_outlined;
+      case FlightSortType.durationDescending:
+        return Icons.hourglass_bottom_rounded;
+      case FlightSortType.airlineAscending:
+      case FlightSortType.airlineDescending:
+        return Icons.flight_takeoff_rounded;
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:flightdeck/core/theme/app_colors.dart';
 import 'package:flightdeck/features/flights/presentation/bloc/flight_bloc.dart';
 import 'package:flightdeck/features/flights/presentation/bloc/flight_event.dart';
 import 'package:flightdeck/features/flights/presentation/bloc/flight_state.dart';
+import 'package:flightdeck/features/flights/presentation/widgets/filter_bottom_sheet.dart';
 import 'package:flightdeck/features/flights/presentation/widgets/flight_card.dart';
 import 'package:flightdeck/features/flights/presentation/widgets/flight_header.dart';
 import 'package:flightdeck/features/flights/presentation/widgets/sort_filter_bar.dart';
@@ -260,12 +261,12 @@ class FlightPage extends StatelessWidget {
   }
 
   void _openFilterBottomSheet(BuildContext context, FlightLoaded state) {
-    // Placeholder triggered before bottom sheet widget is created in next step
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Opening Filter...'),
-        duration: Duration(milliseconds: 500),
-      ),
+    FilterBottomSheet.show(
+      context,
+      availableAirlines: state.availableAirlines,
+      initialSelectedAirlines: state.selectedAirlines.isNotEmpty
+          ? state.selectedAirlines
+          : (state.selectedAirline != null ? {state.selectedAirline!} : {}),
     );
   }
 

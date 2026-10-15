@@ -3,7 +3,13 @@ enum FlightSortType {
   priceLowToHigh('Price: Low to High'),
   priceHighToLow('Price: High to Low'),
   departureTime('Departure Time'),
-  duration('Duration');
+  duration('Duration'),
+  airlineAscending('Airline A → Z'),
+  airlineDescending('Airline Z → A'),
+  durationAscending('Duration: Shortest First'),
+  durationDescending('Duration: Longest First'),
+  priceAscending('Price: Low to High'),
+  priceDescending('Price: High to Low');
 
   final String label;
   const FlightSortType(this.label);
@@ -19,10 +25,16 @@ class LoadFlights extends FlightEvent {
   const LoadFlights();
 }
 
-/// Event dispatched when the user selects an airline filter.
+/// Event dispatched when the user selects a single airline filter.
 class FilterFlightsByAirline extends FlightEvent {
   final String? airline;
   const FilterFlightsByAirline(this.airline);
+}
+
+/// Event dispatched when the user selects multiple airlines via checkboxes.
+class FilterFlightsByMultipleAirlines extends FlightEvent {
+  final Set<String> airlines;
+  const FilterFlightsByMultipleAirlines(this.airlines);
 }
 
 /// Event dispatched when the user selects a sorting criteria.

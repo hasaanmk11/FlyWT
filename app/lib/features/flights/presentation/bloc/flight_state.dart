@@ -23,12 +23,14 @@ class FlightLoaded extends FlightState {
   final List<Flight> allFlights;
   final List<Flight> displayedFlights;
   final String? selectedAirline;
+  final Set<String> selectedAirlines;
   final FlightSortType? sortType;
 
   const FlightLoaded({
     required this.allFlights,
     required this.displayedFlights,
     this.selectedAirline,
+    this.selectedAirlines = const {},
     this.sortType,
   });
 

@@ -11,6 +11,7 @@ class FlightBloc extends Bloc<FlightEvent, FlightState> {
   FlightBloc(this.getFlights) : super(const FlightInitial()) {
     on<LoadFlights>(_onLoadFlights);
     on<FilterFlightsByAirline>(_onFilterFlightsByAirline);
+    on<FilterFlightsByMultipleAirlines>(_onFilterFlightsByMultipleAirlines);
     on<SortFlights>(_onSortFlights);
     on<ClearFlightFilter>(_onClearFlightFilter);
   }
@@ -40,26 +41,47 @@ class FlightBloc extends Bloc<FlightEvent, FlightState> {
     if (state is! FlightLoaded) return;
     final currentState = state as FlightLoaded;
 
-    // Normalizing selection: null or 'All Airlines' clears the filter
     final selectedAirline =
         (event.airline == null || event.airline == 'All Airlines')
             ? null
             : event.airline;
 
-    // Filter and sort are combined seamlessly without mutating original data
     final updatedList = _applyFilterAndSort(
       currentState.allFlights,
-      selectedAirline,
-      currentState.sortType,
+      airline: selectedAirline,
+      sortType: currentState.sortType,
     );
 
-    // Keep allFlights unchanged so filters can
-    // always be cleared without querying the database again.
     emit(
       FlightLoaded(
         allFlights: currentState.allFlights,
         displayedFlights: updatedList,
         selectedAirline: selectedAirline,
+        selectedAirlines: selectedAirline != null ? {selectedAirline} : {},
+        sortType: currentState.sortType,
+      ),
+    );
+  }
+
+  void _onFilterFlightsByMultipleAirlines(
+    FilterFlightsByMultipleAirlines event,
+    Emitter<FlightState> emit,
+  ) {
+    if (state is! FlightLoaded) return;
+    final currentState = state as FlightLoaded;
+
+    final updatedList = _applyFilterAndSort(
+      currentState.allFlights,
+      airlines: event.airlines,
+      sortType: currentState.sortType,
+    );
+
+    emit(
+      FlightLoaded(
+        allFlights: currentState.allFlights,
+        displayedFlights: updatedList,
+        selectedAirline: event.airlines.length == 1 ? event.airlines.first : null,
+        selectedAirlines: event.airlines,
         sortType: currentState.sortType,
       ),
     );
@@ -74,8 +96,9 @@ class FlightBloc extends Bloc<FlightEvent, FlightState> {
 
     final updatedList = _applyFilterAndSort(
       currentState.allFlights,
-      currentState.selectedAirline,
-      event.sortType,
+      airline: currentState.selectedAirline,
+      airlines: currentState.selectedAirlines,
+      sortType: event.sortType,
     );
 
     emit(
@@ -83,6 +106,7 @@ class FlightBloc extends Bloc<FlightEvent, FlightState> {
         allFlights: currentState.allFlights,
         displayedFlights: updatedList,
         selectedAirline: currentState.selectedAirline,
+        selectedAirlines: currentState.selectedAirlines,
         sortType: event.sortType,
       ),
     );
@@ -97,8 +121,7 @@ class FlightBloc extends Bloc<FlightEvent, FlightState> {
 
     final updatedList = _applyFilterAndSort(
       currentState.allFlights,
-      null,
-      currentState.sortType,
+      sortType: currentState.sortType,
     );
 
     emit(
@@ -106,6 +129,7 @@ class FlightBloc extends Bloc<FlightEvent, FlightState> {
         allFlights: currentState.allFlights,
         displayedFlights: updatedList,
         selectedAirline: null,
+        selectedAirlines: const {},
         sortType: currentState.sortType,
       ),
     );
@@ -113,13 +137,20 @@ class FlightBloc extends Bloc<FlightEvent, FlightState> {
 
   /// Helper to apply both airline filtering and sorting in a single pipeline.
   List<Flight> _applyFilterAndSort(
-    List<Flight> source,
+    List<Flight> source, {
     String? airline,
+    Set<String> airlines = const {},
     FlightSortType? sortType,
-  ) {
+  }) {
     // 1. Filter by airline
     List<Flight> result;
-    if (airline != null && airline.isNotEmpty && airline != 'All Airlines') {
+    if (airlines.isNotEmpty) {
+      result = source
+          .where((f) => airlines.contains(f.airlineName))
+          .toList();
+    } else if (airline != null &&
+        airline.isNotEmpty &&
+        airline != 'All Airlines') {
       result = source
           .where((f) => f.airlineName.toLowerCase() == airline.toLowerCase())
           .toList();
@@ -131,9 +162,11 @@ class FlightBloc extends Bloc<FlightEvent, FlightState> {
     if (sortType != null) {
       switch (sortType) {
         case FlightSortType.priceLowToHigh:
+        case FlightSortType.priceAscending:
           result.sort((a, b) => a.price.compareTo(b.price));
           break;
         case FlightSortType.priceHighToLow:
+        case FlightSortType.priceDescending:
           result.sort((a, b) => b.price.compareTo(a.price));
           break;
         case FlightSortType.departureTime:
@@ -142,8 +175,28 @@ class FlightBloc extends Bloc<FlightEvent, FlightState> {
           );
           break;
         case FlightSortType.duration:
+        case FlightSortType.durationAscending:
           result.sort(
             (a, b) => a.durationInMinutes.compareTo(b.durationInMinutes),
+          );
+          break;
+        case FlightSortType.durationDescending:
+          result.sort(
+            (a, b) => b.durationInMinutes.compareTo(a.durationInMinutes),
+          );
+          break;
+        case FlightSortType.airlineAscending:
+          result.sort(
+            (a, b) => a.airlineName
+                .toLowerCase()
+                .compareTo(b.airlineName.toLowerCase()),
+          );
+          break;
+        case FlightSortType.airlineDescending:
+          result.sort(
+            (a, b) => b.airlineName
+                .toLowerCase()
+                .compareTo(a.airlineName.toLowerCase()),
           );
           break;
       }
