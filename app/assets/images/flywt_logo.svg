@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70" width="240" height="70">
+  <defs>
+    <linearGradient id="flywtGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9418"/>
+      <stop offset="100%" stop-color="#FF6B00"/>
+    </linearGradient>
+  </defs>
+  <!-- Airplane icon in circle -->
+  <circle cx="35" cy="35" r="28" fill="url(#flywtGrad)"/>
+  <path d="M22 35 L44 24 L38 34 L48 35 L50 37 L38 38 L42 46 L37 43 L32 37 L22 35 Z" fill="#FFFFFF"/>
+  <!-- FlyWT Text -->
+  <text x="75" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="34" font-weight="900" fill="#FFFFFF" letter-spacing="1.5">Fly<tspan fill="#FF9418">WT</tspan></text>
+</svg>
