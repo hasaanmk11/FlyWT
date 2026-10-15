@@ -1,6 +1,6 @@
-# FlightDeck
+# FlyWT
 
-FlightDeck is a Flutter flight-listing application built for a technical machine test.
+FlyWT is a Flutter flight-booking application built for a technical machine test, meticulously matching the provided Figma design system.
 
 ## Technologies
 - **Flutter** & **Dart**
@@ -18,54 +18,46 @@ FlightDeck is a Flutter flight-listing application built for a technical machine
 lib/
 ├── core/
 │   ├── constants/
-│   │   └── api_constants.dart
-│   └── database/
-│       └── database_helper.dart
+│   │   └── api_constants.dart           # API endpoint & Airline CDN base URL
+│   ├── database/
+│   │   └── database_helper.dart         # SQLite schema & database lifecycle
+│   └── theme/
+│       ├── app_colors.dart              # FlyWT color palette
+│       └── app_theme.dart               # Theme configuration
 ├── features/
 │   └── flights/
 │       ├── data/
 │       │   ├── datasources/
-│       │   │   ├── flight_remote_data_source.dart
-│       │   │   └── flight_local_data_source.dart
+│       │   │   ├── flight_remote_data_source.dart  # Dio API client
+│       │   │   └── flight_local_data_source.dart   # SQLite CRUD & batch insert
 │       │   ├── models/
-│       │   │   └── flight_model.dart
+│       │   │   └── flight_model.dart               # JSON parsing & SQLite mapping
 │       │   └── repositories/
-│       │       └── flight_repository_impl.dart
+│       │       └── flight_repository_impl.dart     # Offline-first caching logic
 │       ├── domain/
 │       │   ├── entities/
-│       │   │   └── flight.dart
+│       │   │   └── flight.dart                     # Core domain entity (outbound + return)
 │       │   ├── repositories/
-│       │   │   └── flight_repository.dart
+│       │   │   └── flight_repository.dart          # Pure abstract contract
 │       │   └── usecases/
-│       │       └── get_flights.dart
+│       │       └── get_flights.dart                # Simple business use case
 │       └── presentation/
 │           ├── bloc/
-│           │   ├── flight_bloc.dart
-│           │   ├── flight_event.dart
-│           │   └── flight_state.dart
+│           │   ├── flight_bloc.dart                # In-memory filter/sort BLoC
+│           │   ├── flight_event.dart               # BLoC events & sort enum
+│           │   └── flight_state.dart               # Initial, Loading, Loaded, Error
 │           ├── pages/
-│           │   └── flight_page.dart
+│           │   ├── splash_page.dart                # Full-screen cinematic splash with Continue
+│           │   └── flight_page.dart                # Main flight screen & list
 │           └── widgets/
-│               ├── flight_card.dart
-│               ├── airline_filter.dart
-│               └── sort_button.dart
-├── app.dart
-└── main.dart
-```
-
-### Architecture Flow
-```
-Presentation (UI & Widgets)
-       ↓
-     BLoC
-       ↓
-    UseCase (GetFlights)
-       ↓
-  Repository (FlightRepository)
-       ↓
-Local / Remote Data Source
-       ↓
-SQLite / Dio API
+│               ├── flight_header.dart              # Blue header banner (Route + Metadata)
+│               ├── flight_card.dart                # Ticket card with semi-circle cutouts
+│               ├── journey_row.dart                # Flight leg with SVG logo & orange path
+│               ├── sort_filter_bar.dart            # Orange floating Sort/Filter pill
+│               ├── filter_bottom_sheet.dart        # Multi-airline checkbox filter sheet
+│               └── sort_bottom_sheet.dart          # Airline, Duration, Price sort sheet
+├── app.dart                                        # MaterialApp with FlyWT theme
+└── main.dart                                       # Manual constructor DI & BlocProvider
 ```
 
 ---
@@ -74,7 +66,9 @@ SQLite / Dio API
 
 ### First App Launch
 ```
-App Opens
+FlyWT Splash Screen (tap CONTINUE)
+   ↓
+Flight Screen Opens
    ↓
 Check SQLite
    ↓
@@ -82,7 +76,7 @@ SQLite is Empty
    ↓
 Call API using Dio
    ↓
-Parse Flights JSON
+Parse Flights JSON (Outbound + Return legs)
    ↓
 Save Flights into SQLite (Batch Insert)
    ↓
@@ -91,7 +85,9 @@ Display Flights in UI
 
 ### Second and Later Launches (Online or Offline)
 ```
-App Opens
+FlyWT Splash Screen (tap CONTINUE)
+   ↓
+Flight Screen Opens
    ↓
 Check SQLite
    ↓
@@ -106,27 +102,11 @@ Display Flights in UI
 
 ---
 
-## Features
-- **Live Flight API Integration**: Connects to the results endpoint with timeout configurations and cleartext HTTP support on Android.
-- **SQLite Offline Caching**: Persists search results on first launch; subsequent launches read directly from SQLite without network requests.
-- **Airline Filtering**: Dynamic filter generated from loaded flights (no hardcoding); filters in-memory without re-querying SQLite or API.
-- **Flight Sorting**: Sort by Price (Low → High / High → Low), Departure Time, and Duration.
-- **Combined Filtering & Sorting**: Seamlessly filters and sorts simultaneously on in-memory data.
-- **Airline SVG Logos**: Loads vector logos from CDN (`https://souqsafaraiweb.caxita.ca/AirlineIcons/{airlineCode}.svg`) with placeholder and flight icon error fallback.
-- **Interview-Friendly Code**: Simple, straightforward constructors, zero overcomplicated boilerplate.
-
----
-
-## Running the Application
-
-```bash
-cd app
-flutter pub get
-flutter run
-```
-
-To run all automated verification tests:
-```bash
-cd app
-flutter test
-```
+## FlyWT Figma Design System Features
+- **Splash Screen**: Full-screen aircraft background with dark gradient overlay, FlyWT branding, bold uppercase headline, and wide orange Continue button.
+- **Flight Header**: Navy blue banner featuring route (`DXB ➔ KWI`), decorative airplane divider, date, travellers, and flight count.
+- **Flight Ticket Cards**: Rounded white ticket cards with decorative semi-circle cutouts, dotted divider, red "Non Refundable" status, and prominent price.
+- **Outbound & Return Legs**: Reusable `JourneyRow` displaying airline SVG logo, timings, airport codes, orange path marker, and duration.
+- **Floating Controls**: Orange floating bar at bottom center with `Sort` and `Filter` actions.
+- **Filter Bottom Sheet**: Dynamic airline checkboxes, "Clear" shortcut, and "Reset" / "Done" action buttons.
+- **Sort Bottom Sheet**: Dual-direction sorting controls (Ascending ▲ / Descending ▼) for Airline, Duration, and Price.
