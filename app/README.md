@@ -1,16 +1,36 @@
-# app
+# FlightDeck
 
-A new Flutter project.
+FlightDeck is a Flutter flight-listing application built for a technical machine test.
 
-## Getting Started
+## Technologies
+- **Flutter** & **Dart**
+- **BLoC** (`flutter_bloc`) for reactive state management
+- **Dio** for HTTP networking
+- **SQLite** (`sqflite` & `path`) for local persistent caching
+- **flutter_svg** for high-resolution airline SVG logos
+- **Clean Architecture** with constructor-based dependency injection
 
-This project is a starting point for a Flutter application.
+## Architecture
+```
+Presentation
+     ↓
+   BLoC
+     ↓
+  UseCase
+     ↓
+Repository
+     ↓
+Data Sources (SQLite / Dio)
+```
 
-A few resources to get you started if this is your first Flutter project:
+## Data Flow
+- **First Launch**: API → SQLite → UI
+- **Later Launches**: SQLite → UI (No network call)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Features
+- Flight API integration with Dio
+- SQLite offline persistence
+- Dynamic airline filtering
+- Price, departure time, and duration sorting
+- SVG airline logo loading with fallback
+- Clean architecture with manual constructor dependency injection
