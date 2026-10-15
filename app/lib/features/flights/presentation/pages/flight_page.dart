@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flightdeck/features/flights/presentation/bloc/flight_bloc.dart';
 import 'package:flightdeck/features/flights/presentation/bloc/flight_event.dart';
 import 'package:flightdeck/features/flights/presentation/bloc/flight_state.dart';
+import 'package:flightdeck/features/flights/presentation/widgets/airline_filter.dart';
 import 'package:flightdeck/features/flights/presentation/widgets/flight_card.dart';
+import 'package:flightdeck/features/flights/presentation/widgets/sort_button.dart';
 
 /// Main screen displaying the flight catalog with filtering, sorting, and caching.
 class FlightPage extends StatelessWidget {
@@ -188,57 +190,140 @@ class FlightPage extends StatelessWidget {
   }
 
   Widget _buildLoadedView(BuildContext context, FlightLoaded state) {
-    if (state.displayedFlights.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.search_off_rounded,
-                size: 64,
-                color: Colors.grey.shade400,
+    return Column(
+      children: [
+        // Top Filtering & Sorting Controls Bar
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'No flights found',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E293B),
-                ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: AirlineFilter(
+                      selectedAirline: state.selectedAirline,
+                      airlines: state.availableAirlines,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  SortButton(
+                    selectedSortType: state.sortType,
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Try selecting a different airline or clearing the filter.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF64748B),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextButton.icon(
-                onPressed: () {
-                  context.read<FlightBloc>().add(const ClearFlightFilter());
-                },
-                icon: const Icon(Icons.clear_all_rounded),
-                label: const Text('Show All Airlines'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${state.displayedFlights.length} of ${state.allFlights.length} flights',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                  if (state.selectedAirline != null)
+                    GestureDetector(
+                      onTap: () {
+                        context
+                            .read<FlightBloc>()
+                            .add(const ClearFlightFilter());
+                      },
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.close_rounded,
+                            size: 14,
+                            color: Color(0xFFDC2626),
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Reset Filter',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFDC2626),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
             ],
           ),
         ),
-      );
-    }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: state.displayedFlights.length,
-      itemBuilder: (context, index) {
-        final flight = state.displayedFlights[index];
-        return FlightCard(flight: flight);
-      },
+        // Flights List or Empty State
+        Expanded(
+          child: state.displayedFlights.isEmpty
+              ? _buildEmptyState(context)
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: state.displayedFlights.length,
+                  itemBuilder: (context, index) {
+                    final flight = state.displayedFlights[index];
+                    return FlightCard(flight: flight);
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search_off_rounded,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No flights found',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Try selecting a different airline or clearing the filter.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF64748B),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: () {
+                context.read<FlightBloc>().add(const ClearFlightFilter());
+              },
+              icon: const Icon(Icons.clear_all_rounded),
+              label: const Text('Show All Airlines'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
